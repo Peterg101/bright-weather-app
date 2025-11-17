@@ -1,48 +1,93 @@
 import React, { useState } from "react";
-import { Box, Button, TextField, Typography, CircularProgress, Card, CardContent } from "@mui/material";
+import { Box, Button, TextField, Typography, CircularProgress, Grid } from "@mui/material";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
 
-export const Weather: React.FC = () => {
-  const [city, setCity] = useState("");
-  const [trigger, { data, error, isFetching }] = useLazyGetWeatherByCityQuery();
+interface CityWeather {
+  name: string;
+  main: {
+    temp: number;
+    feels_like: number;
+    temp_max: number;
+    temp_min: number;
+    humidity: number;
+  };
+  wind: {
+    speed: number;
+  };
+  rain?: {
+    "1h"?: number;
+  };
+}
 
-  const handleFetch = () => {
-    if (city.trim()) {
-      trigger(city);
+export const Weather: React.FC = () => {
+  const [cityInput, setCityInput] = useState("");
+  const [cities, setCities] = useState<CityWeather[]>([]);
+  const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
+
+  const handleFetch = async () => {
+    if (!cityInput.trim()) return;
+
+    try {
+      const result = await trigger(cityInput).unwrap();
+      
+      setCities((prev) => {
+        // Replace city if it already exists, otherwise add
+        const exists = prev.find((c) => c.name.toLowerCase() === result.name.toLowerCase());
+        if (exists) {
+          return prev.map((c) =>
+            c.name.toLowerCase() === result.name.toLowerCase() ? result : c
+          );
+        }
+        return [...prev, result];
+      });
+
+      setCityInput(""); // clear input
+    } catch {
+      console.error("Error fetching weather data");
     }
   };
 
   return (
-    <Box sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-      <Typography variant="h4">Bright Weather App</Typography>
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
+        Bright Weather App
+      </Typography>
 
-      <Box sx={{ display: "flex", gap: 1 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 4 }}>
         <TextField
           label="City"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
+          value={cityInput}
+          onChange={(e) => setCityInput(e.target.value)}
         />
         <Button variant="contained" onClick={handleFetch}>
           Get Weather
         </Button>
       </Box>
 
-      {isFetching && <CircularProgress />}
+      {isFetching && (
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <CircularProgress />
+        </Box>
+      )}
 
-      {error && <Typography color="error">Error fetching weather data</Typography>}
-
-      {data && (
-        <WeatherCard
-          city={data.name}
-          temp={data.main.temp}
-          feelsLike={data.main.feels_like}
-          tempMax={data.main.temp_max}
-          tempMin={data.main.temp_min}
-          humidity={data.main.humidity}
-          windSpeed={data.wind.speed}
-          rainLastHour={data.rain?.["1h"] ?? 0}
-        />
+      {cities.length > 0 && (
+        <Grid container spacing={2} justifyContent="center">
+          {cities.map((cityData) => (
+            <Grid key={cityData.name} component="div">
+              <WeatherCard
+                city={cityData.name}
+                temp={cityData.main.temp}
+                feelsLike={cityData.main.feels_like}
+                tempMax={cityData.main.temp_max}
+                tempMin={cityData.main.temp_min}
+                humidity={cityData.main.humidity}
+                windSpeed={cityData.wind.speed}
+                rainLastHour={cityData.rain?.["1h"] ?? 0}
+              />
+            </Grid>
+          ))}
+        </Grid>
       )}
     </Box>
   );
