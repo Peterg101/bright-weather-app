@@ -35,8 +35,13 @@ export const Weather: React.FC = () => {
         <Card sx={{ mt: 2, minWidth: 250 }}>
           <CardContent>
             <Typography variant="h6">{data.name}</Typography>
-            <Typography>Temperature: {data.main.temp}°C</Typography>
-            <Typography>Condition: {data.weather[0].description}</Typography>
+            <Typography>Current Temperature: {data.main.temp}°C</Typography>
+            <Typography>Feels Like: {data.main.feels_like}°C</Typography>
+            <Typography>Humidity: {data.main.humidity}%</Typography>
+            <Typography>Maximum Temperature: {data.main.temp_max}°C</Typography>
+            <Typography>Minimum Temperature: {data.main.temp_min}°C</Typography>
+            <Typography>Wind Speed: {data.wind.speed} mph</Typography>
+            <Typography>Rain Volume for the last hour: {data.wind.speed} mph</Typography>
           </CardContent>
         </Card>
       )}
