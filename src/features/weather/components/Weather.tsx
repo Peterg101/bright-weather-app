@@ -41,7 +41,9 @@ export const Weather: React.FC = () => {
             <Typography>Maximum Temperature: {data.main.temp_max}°C</Typography>
             <Typography>Minimum Temperature: {data.main.temp_min}°C</Typography>
             <Typography>Wind Speed: {data.wind.speed} mph</Typography>
-            <Typography>Rain Volume for the last hour: {data.wind.speed} mph</Typography>
+            <Typography>
+              Rain Volume (last 1h): {data.rain?.["1h"] ?? 0} mm
+            </Typography>
           </CardContent>
         </Card>
       )}
