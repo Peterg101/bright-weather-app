@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, TextField, Typography, CircularProgress, Card, CardContent } from "@mui/material";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
+import { WeatherCard } from "./WeatherCard";
 
 export const Weather: React.FC = () => {
   const [city, setCity] = useState("");
@@ -32,20 +33,16 @@ export const Weather: React.FC = () => {
       {error && <Typography color="error">Error fetching weather data</Typography>}
 
       {data && (
-        <Card sx={{ mt: 2, minWidth: 250 }}>
-          <CardContent>
-            <Typography variant="h6">{data.name}</Typography>
-            <Typography>Current Temperature: {data.main.temp}°C</Typography>
-            <Typography>Feels Like: {data.main.feels_like}°C</Typography>
-            <Typography>Humidity: {data.main.humidity}%</Typography>
-            <Typography>Maximum Temperature: {data.main.temp_max}°C</Typography>
-            <Typography>Minimum Temperature: {data.main.temp_min}°C</Typography>
-            <Typography>Wind Speed: {data.wind.speed} mph</Typography>
-            <Typography>
-              Rain Volume (last 1h): {data.rain?.["1h"] ?? 0} mm
-            </Typography>
-          </CardContent>
-        </Card>
+        <WeatherCard
+          city={data.name}
+          temp={data.main.temp}
+          feelsLike={data.main.feels_like}
+          tempMax={data.main.temp_max}
+          tempMin={data.main.temp_min}
+          humidity={data.main.humidity}
+          windSpeed={data.wind.speed}
+          rainLastHour={data.rain?.["1h"] ?? 0}
+        />
       )}
     </Box>
   );
