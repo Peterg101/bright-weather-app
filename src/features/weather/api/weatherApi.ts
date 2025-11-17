@@ -11,7 +11,7 @@ export const weatherApi = createApi({
         url: "weather",
         params: {
           q: city,
-          appid: process.env.REACT_APP,
+          appid: process.env.REACT_APP_OPENWEATHER_KEY,
           units: "metric",
         },
       }),
