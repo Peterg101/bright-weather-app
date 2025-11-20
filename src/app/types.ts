@@ -17,6 +17,7 @@ export interface CountryOption {
 }
 
 export interface CityWeather {
+  id:string
   name: string;
   main: {
     temp: number;
@@ -35,3 +36,8 @@ export interface CityWeather {
     "1h"?: number;
   };
 }
+
+export interface WeatherState {
+  items: CityWeather[];
+}
+
