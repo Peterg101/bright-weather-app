@@ -32,7 +32,6 @@ export const Weather: React.FC = () => {
   const [cities, setCities] = useState<CityWeather[]>([]);
   const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
 
-  // Toasts
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastSeverity, setToastSeverity] = useState<
@@ -83,7 +82,6 @@ export const Weather: React.FC = () => {
         Bright Weather App
       </Typography>
 
-      {/* Input Row */}
       <Box
         sx={{
           display: "flex",
@@ -98,7 +96,6 @@ export const Weather: React.FC = () => {
           onChange={(e) => setCityInput(e.target.value)}
         />
 
-        {/* Flag Autocomplete */}
         <Autocomplete
           sx={{ width: 200 }}
           options={COUNTRIES}
@@ -125,14 +122,12 @@ export const Weather: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Loading */}
       {isFetching && (
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Weather Cards */}
       {cities.length > 0 && (
         <Grid container spacing={2} justifyContent="center">
           {cities.map((cityData) => (
@@ -152,7 +147,6 @@ export const Weather: React.FC = () => {
         </Grid>
       )}
 
-      {/* Toast */}
       <Snackbar
         open={toastOpen}
         autoHideDuration={3000}
