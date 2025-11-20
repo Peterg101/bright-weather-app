@@ -12,12 +12,8 @@ import {
 } from "@mui/material";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
+import { CountryOption, CityWeather } from "../../../app/types";
 
-interface CountryOption {
-  code: string;
-  label: string;
-  flag: string;
-}
 
 const COUNTRIES: CountryOption[] = [
   { code: "GB", label: "United Kingdom", flag: "🇬🇧" },
@@ -27,23 +23,6 @@ const COUNTRIES: CountryOption[] = [
   { code: "ES", label: "Spain", flag: "🇪🇸" },
   { code: "IT", label: "Italy", flag: "🇮🇹" },
 ];
-
-interface CityWeather {
-  name: string;
-  main: {
-    temp: number;
-    feels_like: number;
-    temp_max: number;
-    temp_min: number;
-    humidity: number;
-  };
-  wind: {
-    speed: number;
-  };
-  rain?: {
-    "1h"?: number;
-  };
-}
 
 export const Weather: React.FC = () => {
   const [cityInput, setCityInput] = useState("");
@@ -178,7 +157,7 @@ export const Weather: React.FC = () => {
         open={toastOpen}
         autoHideDuration={3000}
         onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={() => setToastOpen(false)}
