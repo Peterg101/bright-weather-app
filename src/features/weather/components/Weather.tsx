@@ -141,7 +141,7 @@ export const Weather: React.FC = () => {
                 humidity={cityData.main.humidity}
                 windSpeed={cityData.wind.speed}
                 rainLastHour={cityData.rain?.["1h"] ?? 0}
-                country = {cityData?.sys?.country}
+                country = {cityData.sys?.country}
               />
             </Grid>
           ))}

@@ -16,9 +16,10 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   return (
     <Card sx={{ mt: 3, minWidth: 300, maxWidth: 400, boxShadow: 6, borderRadius: 3 }}>
       <CardContent>
-        <Typography variant="h5" sx={{ mb: 1 }}>
-          {city}
-        </Typography>
+       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Typography variant="h5">{city}</Typography>
+          <Typography variant="h5">{country}</Typography>
+        </Box>
 
         <Divider sx={{ mb: 2 }} />
 
