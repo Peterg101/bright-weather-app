@@ -6,7 +6,8 @@ export interface WeatherCardProps {
     tempMin: number;
     humidity: number;
     windSpeed: number;
-    rainLastHour: number;  
+    rainLastHour: number;
+    country: string  
 }
 
 export interface CountryOption {
@@ -26,6 +27,9 @@ export interface CityWeather {
   };
   wind: {
     speed: number;
+  };
+  sys:{
+    country: string;
   };
   rain?: {
     "1h"?: number;

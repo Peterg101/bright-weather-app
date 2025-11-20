@@ -55,7 +55,7 @@ export const Weather: React.FC = () => {
         city: cityInput,
         country: countryInput.code,
       }).unwrap();
-
+      console.log(result)
       setCities((prev) => {
         const exists = prev.find(
           (c) => c.name.toLowerCase() === result.name.toLowerCase()
@@ -141,6 +141,7 @@ export const Weather: React.FC = () => {
                 humidity={cityData.main.humidity}
                 windSpeed={cityData.wind.speed}
                 rainLastHour={cityData.rain?.["1h"] ?? 0}
+                country = {cityData?.sys?.country}
               />
             </Grid>
           ))}

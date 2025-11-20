@@ -11,6 +11,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   humidity,
   windSpeed,
   rainLastHour,
+  country
 }) => {
   return (
     <Card sx={{ mt: 3, minWidth: 300, maxWidth: 400, boxShadow: 6, borderRadius: 3 }}>
