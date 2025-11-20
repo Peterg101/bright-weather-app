@@ -13,16 +13,7 @@ import {
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
 import { CountryOption, CityWeather } from "../../../app/types";
-
-
-const COUNTRIES: CountryOption[] = [
-  { code: "GB", label: "United Kingdom", flag: "🇬🇧" },
-  { code: "US", label: "United States", flag: "🇺🇸" },
-  { code: "FR", label: "France", flag: "🇫🇷" },
-  { code: "DE", label: "Germany", flag: "🇩🇪" },
-  { code: "ES", label: "Spain", flag: "🇪🇸" },
-  { code: "IT", label: "Italy", flag: "🇮🇹" },
-];
+import { COUNTRIES } from "../../../app/utils/utils";
 
 export const Weather: React.FC = () => {
   const [cityInput, setCityInput] = useState("");

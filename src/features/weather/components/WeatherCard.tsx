@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, Typography, Divider, Box } from "@mui/material";
 import { WeatherCardProps } from "../../../app/types";
+import { COUNTRIES } from "../../../app/utils/utils";
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
   city,
@@ -13,12 +14,16 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   rainLastHour,
   country
 }) => {
+
+  const countryInfo = COUNTRIES.find(c => c.code === country);
+  const flag = countryInfo?.flag ?? "";
+
   return (
     <Card sx={{ mt: 3, minWidth: 300, maxWidth: 400, boxShadow: 6, borderRadius: 3 }}>
       <CardContent>
        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h5">{city}</Typography>
-          <Typography variant="h5">{country}</Typography>
+          <Typography variant="h5">{flag}</Typography>
         </Box>
 
         <Divider sx={{ mb: 2 }} />
