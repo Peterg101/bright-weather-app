@@ -1,7 +1,32 @@
 import React, { useState } from "react";
-import { Box, Button, TextField, Typography, CircularProgress, Grid } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  CircularProgress,
+  Grid,
+  Snackbar,
+  Alert,
+  Autocomplete,
+} from "@mui/material";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
+
+interface CountryOption {
+  code: string;
+  label: string;
+  flag: string;
+}
+
+const COUNTRIES: CountryOption[] = [
+  { code: "GB", label: "United Kingdom", flag: "🇬🇧" },
+  { code: "US", label: "United States", flag: "🇺🇸" },
+  { code: "FR", label: "France", flag: "🇫🇷" },
+  { code: "DE", label: "Germany", flag: "🇩🇪" },
+  { code: "ES", label: "Spain", flag: "🇪🇸" },
+  { code: "IT", label: "Italy", flag: "🇮🇹" },
+];
 
 interface CityWeather {
   name: string;
@@ -22,29 +47,54 @@ interface CityWeather {
 
 export const Weather: React.FC = () => {
   const [cityInput, setCityInput] = useState("");
+  const [countryInput, setCountryInput] = useState<CountryOption>(
+    COUNTRIES[0]
+  );
   const [cities, setCities] = useState<CityWeather[]>([]);
   const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
 
+  // Toasts
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastSeverity, setToastSeverity] = useState<
+    "success" | "error" | "info" | "warning"
+  >("info");
+
+  const showToast = (msg: string, severity: typeof toastSeverity) => {
+    setToastMessage(msg);
+    setToastSeverity(severity);
+    setToastOpen(true);
+  };
+
   const handleFetch = async () => {
-    if (!cityInput.trim()) return;
+    if (!cityInput.trim()) {
+      showToast("Please enter a city", "warning");
+      return;
+    }
 
     try {
-      const result = await trigger(cityInput).unwrap();
-      
+      const result = await trigger({
+        city: cityInput,
+        country: countryInput.code,
+      }).unwrap();
+
       setCities((prev) => {
-        // Replace city if it already exists, otherwise add
-        const exists = prev.find((c) => c.name.toLowerCase() === result.name.toLowerCase());
+        const exists = prev.find(
+          (c) => c.name.toLowerCase() === result.name.toLowerCase()
+        );
         if (exists) {
+          showToast(`Updated ${result.name}`, "info");
           return prev.map((c) =>
             c.name.toLowerCase() === result.name.toLowerCase() ? result : c
           );
         }
+        showToast(`Added ${result.name}`, "success");
         return [...prev, result];
       });
 
-      setCityInput(""); // clear input
+      setCityInput("");
     } catch {
-      console.error("Error fetching weather data");
+      showToast("City not found in selected country", "error");
     }
   };
 
@@ -54,23 +104,56 @@ export const Weather: React.FC = () => {
         Bright Weather App
       </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 4 }}>
+      {/* Input Row */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          gap: 2,
+          mb: 4,
+        }}
+      >
         <TextField
           label="City"
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
         />
+
+        {/* Flag Autocomplete */}
+        <Autocomplete
+          sx={{ width: 200 }}
+          options={COUNTRIES}
+          autoHighlight
+          getOptionLabel={(option) => `${option.flag} ${option.label}`}
+          value={countryInput}
+          onChange={(e, val) => val && setCountryInput(val)}
+          renderOption={(props, option) => (
+            <Box
+              component="li"
+              {...props}
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
+              <span>{option.flag}</span> {option.label}
+            </Box>
+          )}
+          renderInput={(params) => (
+            <TextField {...params} label="Country" />
+          )}
+        />
+
         <Button variant="contained" onClick={handleFetch}>
           Get Weather
         </Button>
       </Box>
 
+      {/* Loading */}
       {isFetching && (
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <CircularProgress />
         </Box>
       )}
 
+      {/* Weather Cards */}
       {cities.length > 0 && (
         <Grid container spacing={2} justifyContent="center">
           {cities.map((cityData) => (
@@ -89,6 +172,23 @@ export const Weather: React.FC = () => {
           ))}
         </Grid>
       )}
+
+      {/* Toast */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity={toastSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {toastMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
