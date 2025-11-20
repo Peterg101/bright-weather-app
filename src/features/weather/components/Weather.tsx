@@ -14,7 +14,7 @@ import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../app/store";
-import { addOrUpdateCity, removeCity } from "../slices/weatherSlice";
+import { addOrUpdateCity} from "../slices/weatherSlice";
 import { CityWeather } from "../../../app/types";
 import { CountryOption } from "../../../app/types";
 
