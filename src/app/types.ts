@@ -1,4 +1,5 @@
 export interface WeatherCardProps {
+    uuid: string;
     city: string;
     temp: number;
     feelsLike: number;

@@ -46,7 +46,6 @@ export const Weather: React.FC = () => {
     try {
       const result = await trigger({ city: cityInput, country: countryInput.code }).unwrap();
 
-      // Attach country
       const cityData: Omit<CityWeather, "id"> = { ...result, sys: { country: countryInput.code } };
 
       dispatch(addOrUpdateCity(cityData));
@@ -99,6 +98,7 @@ export const Weather: React.FC = () => {
             return (
               <Grid key={cityData.id} component="div">
                 <WeatherCard
+                  uuid={cityData.id}
                   city={cityData.name}
                   temp={cityData.main.temp}
                   feelsLike={cityData.main.feels_like}

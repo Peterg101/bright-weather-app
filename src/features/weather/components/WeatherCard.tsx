@@ -1,9 +1,13 @@
 import React from "react";
-import { Card, CardContent, Typography, Divider, Box } from "@mui/material";
+import { Card, CardContent, Typography, Divider, Box, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { WeatherCardProps } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
+import { useDispatch } from "react-redux";
+import { removeCity } from "../slices/weatherSlice";
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
+  uuid,
   city,
   temp,
   feelsLike,
@@ -18,12 +22,21 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   const countryInfo = COUNTRIES.find(c => c.code === country);
   const flag = countryInfo?.flag ?? "";
 
+  const dispatch = useDispatch()
+
+  const handleDelete = () => {
+    dispatch(removeCity(uuid))
+  }
+
   return (
     <Card sx={{ mt: 3, minWidth: 300, maxWidth: 400, boxShadow: 6, borderRadius: 3 }}>
       <CardContent>
        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h5">{city}</Typography>
           <Typography variant="h5">{flag}</Typography>
+          <IconButton onClick={handleDelete} color="error" sx={{ ml: "auto" }}>
+            <DeleteIcon />
+          </IconButton>
         </Box>
 
         <Divider sx={{ mb: 2 }} />
