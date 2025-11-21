@@ -68,7 +68,7 @@ describe("Weather component", () => {
 
     await waitFor(() => {
       expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
-      expect(screen.getByText(/Added\/Updated London/i)).toBeInTheDocument();
+      expect(screen.getByText(/Added London/i)).toBeInTheDocument();
     });
 
     expect(store.getState().weather.items[0].name).toBe("London");
