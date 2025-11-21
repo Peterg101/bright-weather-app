@@ -3,8 +3,11 @@ import { Card, CardContent, Typography, Divider, Box, IconButton } from "@mui/ma
 import DeleteIcon from "@mui/icons-material/Delete";
 import { WeatherCardProps } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
-import { useDispatch } from "react-redux";
-import { removeCity } from "../slices/weatherSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addOrUpdateCity, removeCity } from "../slices/weatherSlice";
+import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
+import { RootState } from "../../../app/store";
+import RefreshIcon from "@mui/icons-material/Refresh"
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
   uuid,
@@ -23,10 +26,24 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   const flag = countryInfo?.flag ?? "";
 
   const dispatch = useDispatch()
+  const [trigger] = useLazyGetWeatherByCityQuery()
 
   const handleDelete = () => {
     dispatch(removeCity(uuid))
   }
+
+  const handleRefresh = async () => {
+    try {
+      const result = await trigger({ city, country }).unwrap();
+      dispatch(addOrUpdateCity({ ...result, sys: { country }, id: uuid }));
+    } catch {
+      console.error("Failed to refresh city data");
+    }
+  };
+
+  const lastUpdated = useSelector((state: RootState) => 
+    state.weather.items.find(c => c.id === uuid)?.lastUpdated
+  );
 
   return (
     <Card sx={{ mt: 3, minWidth: 300, maxWidth: 400, boxShadow: 6, borderRadius: 3 }}>
@@ -34,6 +51,9 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h5">{city}</Typography>
           <Typography variant="h5">{flag}</Typography>
+          <IconButton onClick={handleRefresh} color="primary">
+            <RefreshIcon />
+          </IconButton>
           <IconButton onClick={handleDelete} color="error" sx={{ ml: "auto" }} aria-label="delete">
             <DeleteIcon />
           </IconButton>
@@ -67,6 +87,11 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
           <Typography>Rain (1h):</Typography>
           <Typography>{rainLastHour} mm</Typography>
         </Box>
+        {lastUpdated && (
+          <Typography variant="caption" sx={{ mt: 1, display: "block" }}>
+            Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );

@@ -39,6 +39,6 @@ export interface CityWeather {
 }
 
 export interface WeatherState {
-  items: CityWeather[];
+  items: (CityWeather & { lastUpdated: number })[];
 }
 
