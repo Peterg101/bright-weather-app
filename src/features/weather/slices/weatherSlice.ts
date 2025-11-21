@@ -12,7 +12,7 @@ export const weatherSlice = createSlice({
   reducers: {
     addOrUpdateCity: (state, action: PayloadAction<Omit<CityWeather, "id">>) => {
       const exists = state.items.find(
-        (c) => c.name.toLowerCase() === action.payload.name.toLowerCase()
+        (c) => c.name.toLowerCase() === action.payload.name.toLowerCase() && c.sys.country === action.payload.name.toLowerCase()
       );
       const cityWithId = { ...action.payload, id: exists?.id ?? uuidv4() };
 
