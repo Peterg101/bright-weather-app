@@ -34,7 +34,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h5">{city}</Typography>
           <Typography variant="h5">{flag}</Typography>
-          <IconButton onClick={handleDelete} color="error" sx={{ ml: "auto" }}>
+          <IconButton onClick={handleDelete} color="error" sx={{ ml: "auto" }} aria-label="delete">
             <DeleteIcon />
           </IconButton>
         </Box>
