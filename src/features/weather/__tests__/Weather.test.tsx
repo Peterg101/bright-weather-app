@@ -51,18 +51,28 @@ describe("Weather component", () => {
   });
 
   it("adds a city successfully", async () => {
-    // Mock API trigger to resolve with a city
-    const mockTrigger = jest.fn().mockResolvedValue({
-      unwrap: jest.fn().mockResolvedValue({
-        name: "London",
-        main: { temp: 25, feels_like: 23, temp_max: 27, temp_min: 20, humidity: 60 },
-        wind: { speed: 10 },
-        rain: { "1h": 2 },
-        sys: { country: "GB" },
-      }),
+    const mockUnwrap = jest.fn().mockResolvedValue({
+      name: "London",
+      main: {
+        temp: 25,
+        feels_like: 23,
+        temp_max: 27,
+        temp_min: 20,
+        humidity: 60,
+      },
+      wind: { speed: 10 },
+      rain: { "1h": 2 },
+      sys: { country: "GB" },
     });
 
-    mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
+    const mockTrigger = jest.fn(() => ({
+      unwrap: mockUnwrap
+    }));
+
+    mockedUseLazyGetWeatherByCityQuery.mockReturnValue([
+      mockTrigger,
+      { isFetching: false }
+    ]);
 
     render(
       <Provider store={store}>
