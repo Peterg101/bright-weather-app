@@ -75,7 +75,7 @@ export const Weather: React.FC = () => {
       console.log(cityData)
       dispatch(addOrUpdateCity(cityData));
 
-      showToast(`Added/Updated ${result.name}`, "success");
+      showToast(`Added ${result.name}`, "success");
       setCityInput("");
     } catch {
       showToast("City not found in selected country", "error");
