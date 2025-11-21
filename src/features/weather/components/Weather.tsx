@@ -17,7 +17,6 @@ import { RootState, AppDispatch } from "../../../app/store";
 import { addOrUpdateCity} from "../slices/weatherSlice";
 import { CityWeather } from "../../../app/types";
 import { CountryOption } from "../../../app/types";
-
 import { COUNTRIES } from "../../../app/utils/utils";
 
 export const Weather: React.FC = () => {
@@ -52,7 +51,7 @@ export const Weather: React.FC = () => {
         console.error(`Failed auto-refresh for ${cityData.name}`, err);
       }
     });
-  }, 10 * 60 * 1000); // 10 minutes
+  }, 10 * 60 * 1000);
 
   return () => clearInterval(interval);
 }, [cities, dispatch, trigger]);
