@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -31,6 +31,31 @@ export const Weather: React.FC = () => {
   const cities = useSelector((state: RootState) => state.weather.items);
   const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
 
+  useEffect(() => {
+  if (cities.length === 0) return;
+
+  const interval = setInterval(() => {
+    cities.forEach(async (cityData) => {
+      try {
+        const result = await trigger({
+          city: cityData.name,
+          country: cityData.sys.country,
+        }).unwrap();
+
+        const updated: Omit<CityWeather, "id"> = {
+          ...result,
+          sys: { country: cityData.sys.country },
+        };
+
+        dispatch(addOrUpdateCity(updated));
+      } catch (err) {
+        console.error(`Failed auto-refresh for ${cityData.name}`, err);
+      }
+    });
+  }, 10 * 60 * 1000); // 10 minutes
+
+  return () => clearInterval(interval);
+}, [cities, dispatch, trigger]);
   const showToast = (msg: string, severity: typeof toastSeverity) => {
     setToastMessage(msg);
     setToastSeverity(severity);
@@ -47,7 +72,7 @@ export const Weather: React.FC = () => {
       const result = await trigger({ city: cityInput, country: countryInput.code }).unwrap();
 
       const cityData: Omit<CityWeather, "id"> = { ...result, sys: { country: countryInput.code } };
-
+      console.log(cityData)
       dispatch(addOrUpdateCity(cityData));
 
       showToast(`Added/Updated ${result.name}`, "success");
