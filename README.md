@@ -1,46 +1,69 @@
-# Getting Started with Create React App
+# 🌦️ Bright Weather App
+A lightweight React app for checking weather by city, featuring Redux Toolkit + RTK Query for state management and API calls.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## ⚙️ Prerequisites
 
-In the project directory, you can run:
+Before running the app, you'll need:
 
-### `npm start`
+### ✅ **Node.js + npm**
+This project uses **npm** (Node Package Manager) to install and run dependencies.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Check if you already have them installed:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+node -v
+npm -v
 
-### `npm test`
+If those commands return version numbers, you're good to go.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+❌ Don't have Node/npm installed?
 
-### `npm run build`
+Download and install the LTS version of Node.js (which includes npm):
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+👉 https://nodejs.org/en/download/
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+After installation, verify again:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+node -v
+npm -v
 
-### `npm run eject`
+## 🚀 Getting Started
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Follow these steps to set up and run the project locally.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 📦 1. Install Dependencies
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Make sure you're in the project root, then run:
 
-## Learn More
+npm install
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔑 2. Environment Variables
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Create a local .env file from the provided template:
+
+cp .env.example .env
+
+Open the new .env file and set the OpenWeather API key to the following:
+
+REACT_APP_OPENWEATHER_KEY=32519de6c3f6e782267483ee4bc43b2b
+
+## ▶️ 3. Run the Development Server
+
+Start the local dev server: 
+
+npm start
+
+Provided the port is available, the app will be available at:
+
+http://localhost:3000
+
+## 🧪 4. Running Tests
+
+This project uses Jest and React Testing Library.
+
+Run all tests:
+
+npm test
