@@ -7,10 +7,11 @@ export const weatherApi = createApi({
   }),
   endpoints: (builder) => ({
     getWeatherByCity: builder.query({
-      query: (city: string) => ({
+      // accept two strings, city + country
+      query: ({ city, country }: { city: string; country: string }) => ({
         url: "weather",
         params: {
-          q: city,
+          q: `${city},${country}`, // still separate when you call it
           appid: process.env.REACT_APP_OPENWEATHER_KEY,
           units: "metric",
         },
