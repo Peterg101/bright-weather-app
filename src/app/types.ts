@@ -9,7 +9,6 @@ export interface WeatherCardProps {
     windSpeed: number;
     rainLastHour: number;
     country: string
-    showToast: (message: string, severity: "success" | "error" | "info" | "warning") => void;
 }
 
 export interface CountryOption {

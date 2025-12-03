@@ -8,6 +8,7 @@ import { updateCity, removeCity } from "../slices/weatherSlice";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { RootState } from "../../../app/store";
 import RefreshIcon from "@mui/icons-material/Refresh"
+import { useToast } from "../../../app/context/ToastContext";
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
   uuid,
@@ -20,11 +21,10 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   windSpeed,
   rainLastHour,
   country,
-  showToast
 }) => {
 
   const countryInfo = COUNTRIES.find(c => c.code === country);
-  
+  const {showToast} = useToast()
 
   const dispatch = useDispatch()
   const [trigger] = useLazyGetWeatherByCityQuery()
