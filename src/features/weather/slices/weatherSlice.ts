@@ -10,36 +10,39 @@ export const weatherSlice = createSlice({
   name: "weather",
   initialState,
   reducers: {
-    addOrUpdateCity: (state, action: PayloadAction<Omit<CityWeather, "id">>) => {
-      const exists = state.items.find(
-        (c) =>
-          c.name.toLowerCase() === action.payload.name.toLowerCase() &&
-          c.sys.country === action.payload.sys.country
-      );
-
+    addCity: (state, action: PayloadAction<Omit<CityWeather, "id">>) => {
       const cityWithId = {
         ...action.payload,
-        id: exists?.id ?? uuidv4(),
+        id: uuidv4(),
         lastUpdated: Date.now(),
       };
-
-      if (exists) {
-        state.items = state.items.map((c) =>
-          c.id === exists.id ? cityWithId : c
-        );
-      } else {
-        state.items.push(cityWithId);
-      }
+      
+      state.items.push(cityWithId);
+      return state;
     },
+    
+    updateCity: (state, action: PayloadAction<{id: string, data: Omit<CityWeather, "id">}>) => {
+      const { id, data } = action.payload;
+      
+      state.items = state.items.map((city) => 
+        city.id === id 
+          ? { ...data, id, lastUpdated: Date.now() } 
+          : city
+      );
+      
+      return state;
+    },
+    
     removeCity: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((c) => c.id !== action.payload);
     },
+    
     clearCities: (state) => {
       state.items = [];
     },
   },
 });
 
-export const { addOrUpdateCity, removeCity, clearCities } = weatherSlice.actions;
+export const { addCity, updateCity, removeCity, clearCities } = weatherSlice.actions;
 
 export default weatherSlice.reducer;

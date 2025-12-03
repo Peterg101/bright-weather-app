@@ -14,7 +14,7 @@ import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../app/store";
-import { addOrUpdateCity} from "../slices/weatherSlice";
+import { addCity, updateCity} from "../slices/weatherSlice";
 import { CityWeather } from "../../../app/types";
 import { CountryOption } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
@@ -46,7 +46,7 @@ export const Weather: React.FC = () => {
           sys: { country: cityData.sys.country },
         };
 
-        dispatch(addOrUpdateCity(updated));
+        dispatch(updateCity({ id: cityData.id, data: updated }));
       } catch (err) {
         console.error(`Failed auto-refresh for ${cityData.name}`, err);
       }
@@ -68,17 +68,30 @@ export const Weather: React.FC = () => {
     }
 
     try {
-      const result = await trigger({ city: cityInput, country: countryInput.code }).unwrap();
-
-      const cityData: Omit<CityWeather, "id"> = { ...result, sys: { country: countryInput.code } };
-      console.log(cityData)
-      dispatch(addOrUpdateCity(cityData));
-
-      showToast(`Added ${result.name}`, "success");
-      setCityInput("");
-    } catch {
-      showToast("City not found in selected country", "error");
+    const result = await trigger({ city: cityInput, country: countryInput.code }).unwrap();
+    
+    const cityData: Omit<CityWeather, "id"> = { 
+      ...result, 
+      sys: { country: countryInput.code } 
+    };
+    
+     const existingCity = cities.find(
+        city => city.name.toLowerCase() === result.name.toLowerCase() && 
+                city.sys.country === countryInput.code
+      );
+    
+    if (existingCity) {
+      dispatch(updateCity({ id: existingCity.id, data: cityData }));
+      showToast(`Updated weather for ${result.name}`, "info");
+    } else {
+      dispatch(addCity(cityData));
+      showToast(`Added ${result.name} to your cities`, "success");
     }
+    
+    setCityInput("");
+  } catch {
+    showToast("City not found in selected country", "error");
+  }
   };
 
   return (
@@ -91,19 +104,32 @@ export const Weather: React.FC = () => {
         <TextField label="City" value={cityInput} onChange={(e) => setCityInput(e.target.value)} />
 
         <Autocomplete
-          sx={{ width: 200 }}
-          options={COUNTRIES}
-          autoHighlight
-          getOptionLabel={(option) => `${option.flag} ${option.label}`}
-          value={countryInput}
-          onChange={(e, val) => val && setCountryInput(val)}
-          renderOption={(props, option) => (
-            <Box component="li" {...props} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>{option.flag}</span> {option.label}
-            </Box>
-          )}
-          renderInput={(params) => <TextField {...params} label="Country" />}
-        />
+        sx={{ width: 200 }}
+        options={COUNTRIES}
+        autoHighlight
+        value={countryInput}
+        onChange={(e, val) => val && setCountryInput(val)}
+        getOptionLabel={(option) => option.label}
+        renderOption={(props, option) => (
+          <Box component="li" {...props} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {option.flag} {option.label}
+          </Box>
+        )}
+        renderInput={(params) => (
+          <TextField 
+            {...params} 
+            label="Country" 
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: countryInput ? (
+                <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                  {countryInput.flag}
+                </Box>
+              ) : null
+            }}
+          />
+        )}
+/>
 
         <Button variant="contained" onClick={handleFetch}>
           Get Weather

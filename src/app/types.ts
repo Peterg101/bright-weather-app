@@ -14,7 +14,7 @@ export interface WeatherCardProps {
 export interface CountryOption {
   code: string;
   label: string;
-  flag: string;
+  flag: React.ReactNode;
 }
 
 export interface CityWeather {
