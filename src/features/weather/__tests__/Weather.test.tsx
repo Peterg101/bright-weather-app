@@ -156,50 +156,62 @@ describe("Weather component", () => {
     expect(store.getState().weather.items).toHaveLength(0);
   });
 
-  it("refreshes a city's weather when refresh button is clicked", async () => {
-    const preloadedState = {
-      weather: {
-        items: [
-          {
-            id: "1",
-            name: "London",
-            main: { temp: 20, feels_like: 19, temp_max: 21, temp_min: 18, humidity: 50 },
-            wind: { speed: 5 },
-            rain: { "1h": 0 },
-            sys: { country: "GB" },
-            lastUpdated: 1000,
-          },
-        ],
-      },
-    };
+ it("refreshes a city's weather when refresh button is clicked", async () => {
+  const preloadedState = {
+    weather: {
+      items: [
+        {
+          id: "1",
+          name: "London",
+          main: { temp: 20, feels_like: 19, temp_max: 21, temp_min: 18, humidity: 50 },
+          wind: { speed: 5 },
+          rain: { "1h": 0 },
+          sys: { country: "GB" },
+          lastUpdated: 1000,
+        },
+      ],
+    },
+  };
 
-    const mockUnwrap = jest.fn().mockResolvedValue({
-      name: "London",
-      main: { temp: 22, feels_like: 20, temp_max: 23, temp_min: 19, humidity: 55 },
-      wind: { speed: 6 },
-      rain: { "1h": 1 },
-      sys: { country: "GB" },
-    });
+  
+  const mockWeatherData = {
+    name: "London",
+    main: { temp: 22, feels_like: 20, temp_max: 23, temp_min: 19, humidity: 55 },
+    wind: { speed: 6 },
+    rain: { "1h": 1 },
+    sys: { country: "GB" }, 
+  };
 
-    const mockTrigger = jest.fn(() => ({ unwrap: mockUnwrap }));
-    mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
+  const mockUnwrap = jest.fn().mockResolvedValue(mockWeatherData);
+  const mockTrigger = jest.fn(() => ({ unwrap: mockUnwrap }));
+  mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
 
-    const store = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
+  const store = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
 
-    render(
-      <Provider store={store}>
-        <Weather />
-      </Provider>
-    );
+  render(
+    <Provider store={store}>
+      <Weather />
+    </Provider>
+  );
 
-    userEvent.click(screen.getByRole("button", { name: /refresh/i }));
+  userEvent.click(screen.getByRole("button", { name: /refresh/i }));
 
-    await waitFor(() => {
-      expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
-      expect(store.getState().weather.items).toHaveLength(1);
-      expect(store.getState().weather.items[0].lastUpdated).toBeGreaterThan(1000);
-      expect(screen.getByText("22°C")).toBeInTheDocument();
-      expect(screen.getByText("1 mm")).toBeInTheDocument();
-    });
-  });  
+  await waitFor(() => {
+    expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
+  });
+
+  await waitFor(() => {
+    const stateItems = store.getState().weather.items;
+    expect(stateItems).toHaveLength(1);
+    
+    const item = stateItems[0];
+    expect(item).toBeTruthy();
+    expect(item.main).toBeTruthy();
+    expect(item.main.temp).toBe(22);
+    expect(item.lastUpdated).toBeGreaterThan(1000);
+  });
+
+  expect(screen.getByText("22°C")).toBeInTheDocument();
+  expect(screen.getByText("1 mm")).toBeInTheDocument();
+});
 });

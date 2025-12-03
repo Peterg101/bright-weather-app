@@ -33,13 +33,21 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   }
 
   const handleRefresh = async () => {
-    try {
-      const result = await trigger({ city, country }).unwrap();
-      dispatch(updateCity({ ...result, sys: { country }, id: uuid }));
-    } catch {
-      console.error("Failed to refresh city data");
-    }
-  };
+  try {
+    const result = await trigger({ city, country }).unwrap();
+    const updatedData = {
+      id: uuid,
+      data: {
+        ...result,
+        sys: { country }
+      }
+    };
+    
+    dispatch(updateCity(updatedData));
+  } catch (error) {
+    console.error("Failed to refresh city data", error);
+  }
+};
 
   const lastUpdated = useSelector((state: RootState) => 
     state.weather.items.find(c => c.id === uuid)?.lastUpdated
