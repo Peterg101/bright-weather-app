@@ -3,13 +3,29 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import userEvent from "@testing-library/user-event";
-
 import weatherReducer from "../slices/weatherSlice";
 import { Weather } from "../components/Weather";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 
+const mockShowToast = jest.fn();
+
+jest.mock("../../../app/context/ToastContext", () => ({
+  useToast: () => ({
+    showToast: mockShowToast,
+  }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 jest.mock("../api/weatherApi");
 const mockedUseLazyGetWeatherByCityQuery = useLazyGetWeatherByCityQuery as jest.Mock;
+
+jest.mock('emoji-flags', () => ({
+  countryCode: jest.fn().mockImplementation((code) => ({ emoji: `${code}-flag` }))
+}), { virtual: true });
+
+jest.mock('react-country-flag', () => (props: any) => (
+  <span data-testid="country-flag">{props.countryCode}-flag</span>
+), { virtual: true });
 
 describe("Weather component", () => {
   let store: any;
@@ -17,6 +33,7 @@ describe("Weather component", () => {
   beforeEach(() => {
     store = configureStore({ reducer: { weather: weatherReducer } });
     mockedUseLazyGetWeatherByCityQuery.mockImplementation(() => [jest.fn(), { isFetching: false }]);
+    mockShowToast.mockClear();
   });
 
   it("renders title and input fields", () => {
@@ -42,7 +59,10 @@ describe("Weather component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Get Weather/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Please enter a city/i)).toBeInTheDocument();
+      expect(mockShowToast).toHaveBeenCalledWith(
+        expect.stringMatching(/Please enter a city/i),
+        "warning"
+      );
     });
   });
 
@@ -68,7 +88,10 @@ describe("Weather component", () => {
 
     await waitFor(() => {
       expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
-      expect(screen.getByText(/Added London/i)).toBeInTheDocument();
+      expect(mockShowToast).toHaveBeenCalledWith(
+        expect.stringMatching(/Added London/i),
+        "success"
+      );
     });
 
     expect(store.getState().weather.items[0].name).toBe("London");
@@ -76,10 +99,60 @@ describe("Weather component", () => {
     expect(screen.getByText("2 mm")).toBeInTheDocument();
   });
 
-  it("shows error toast when API call fails", async () => {
-    const mockTrigger = jest.fn().mockResolvedValue({
-      unwrap: jest.fn().mockRejectedValue(new Error("City not found")),
+  it("updates an existing city", async () => {
+    const preloadedState = {
+      weather: {
+        items: [
+          {
+            id: "1",
+            name: "London",
+            main: { temp: 20, feels_like: 19, temp_max: 21, temp_min: 18, humidity: 50 },
+            wind: { speed: 5 },
+            rain: { "1h": 0 },
+            sys: { country: "GB" },
+            lastUpdated: 1000,
+          },
+        ],
+      },
+    };
+    
+    const customStore = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
+    
+    const mockUnwrap = jest.fn().mockResolvedValue({
+      name: "London",
+      main: { temp: 22, feels_like: 20, temp_max: 23, temp_min: 19, humidity: 55 },
+      wind: { speed: 6 },
+      rain: { "1h": 1 },
+      sys: { country: "GB" },
     });
+    const mockTrigger = jest.fn(() => ({ unwrap: mockUnwrap }));
+    mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
+
+    render(
+      <Provider store={customStore}>
+        <Weather />
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByLabelText(/City/i), { target: { value: "London" } });
+    fireEvent.click(screen.getByRole("button", { name: /Get Weather/i }));
+
+    await waitFor(() => {
+      expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
+      expect(mockShowToast).toHaveBeenCalledWith(
+        expect.stringMatching(/Updated weather for London/i),
+        "info"
+      );
+    });
+
+    expect(customStore.getState().weather.items[0].main.temp).toBe(22);
+    expect(screen.getByText("22°C")).toBeInTheDocument();
+  });
+
+  it("shows error toast when API call fails", async () => {
+    const mockTrigger = jest.fn().mockImplementation(() => ({
+      unwrap: jest.fn().mockRejectedValue(new Error("City not found")),
+    }));
     mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
 
     render(
@@ -92,7 +165,10 @@ describe("Weather component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Get Weather/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/City not found in selected country/i)).toBeInTheDocument();
+      expect(mockShowToast).toHaveBeenCalledWith(
+        expect.stringMatching(/City not found in selected country/i),
+        "error"
+      );
     });
 
     expect(store.getState().weather.items).toHaveLength(0);
@@ -114,8 +190,10 @@ describe("Weather component", () => {
       },
     };
 
+    const customStore = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
+
     render(
-      <Provider store={configureStore({ reducer: { weather: weatherReducer }, preloadedState })}>
+      <Provider store={customStore}>
         <Weather />
       </Provider>
     );
@@ -141,8 +219,10 @@ describe("Weather component", () => {
       },
     };
 
+    const customStore = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
+
     render(
-      <Provider store={configureStore({ reducer: { weather: weatherReducer }, preloadedState })}>
+      <Provider store={customStore}>
         <Weather />
       </Provider>
     );
@@ -153,65 +233,69 @@ describe("Weather component", () => {
       expect(screen.queryByText("London")).not.toBeInTheDocument();
     });
 
-    expect(store.getState().weather.items).toHaveLength(0);
+    expect(customStore.getState().weather.items).toHaveLength(0);
   });
 
- it("refreshes a city's weather when refresh button is clicked", async () => {
-  const preloadedState = {
-    weather: {
-      items: [
-        {
-          id: "1",
-          name: "London",
-          main: { temp: 20, feels_like: 19, temp_max: 21, temp_min: 18, humidity: 50 },
-          wind: { speed: 5 },
-          rain: { "1h": 0 },
-          sys: { country: "GB" },
-          lastUpdated: 1000,
-        },
-      ],
-    },
-  };
+  it("refreshes a city's weather when refresh button is clicked", async () => {
+    const preloadedState = {
+      weather: {
+        items: [
+          {
+            id: "1",
+            name: "London",
+            main: { temp: 20, feels_like: 19, temp_max: 21, temp_min: 18, humidity: 50 },
+            wind: { speed: 5 },
+            rain: { "1h": 0 },
+            sys: { country: "GB" },
+            lastUpdated: 1000,
+          },
+        ],
+      },
+    };
 
-  
-  const mockWeatherData = {
-    name: "London",
-    main: { temp: 22, feels_like: 20, temp_max: 23, temp_min: 19, humidity: 55 },
-    wind: { speed: 6 },
-    rain: { "1h": 1 },
-    sys: { country: "GB" }, 
-  };
+    const mockWeatherData = {
+      name: "London",
+      main: { temp: 22, feels_like: 20, temp_max: 23, temp_min: 19, humidity: 55 },
+      wind: { speed: 6 },
+      rain: { "1h": 1 },
+      sys: { country: "GB" }, 
+    };
 
-  const mockUnwrap = jest.fn().mockResolvedValue(mockWeatherData);
-  const mockTrigger = jest.fn(() => ({ unwrap: mockUnwrap }));
-  mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
+    const mockUnwrap = jest.fn().mockResolvedValue(mockWeatherData);
+    const mockTrigger = jest.fn(() => ({ unwrap: mockUnwrap }));
+    mockedUseLazyGetWeatherByCityQuery.mockReturnValue([mockTrigger, { isFetching: false }]);
 
-  const store = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
+    const customStore = configureStore({ reducer: { weather: weatherReducer }, preloadedState });
 
-  render(
-    <Provider store={store}>
-      <Weather />
-    </Provider>
-  );
+    render(
+      <Provider store={customStore}>
+        <Weather />
+      </Provider>
+    );
 
-  userEvent.click(screen.getByRole("button", { name: /refresh/i }));
+    userEvent.click(screen.getByRole("button", { name: /refresh/i }));
 
-  await waitFor(() => {
-    expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
-  });
+    await waitFor(() => {
+      expect(mockTrigger).toHaveBeenCalledWith({ city: "London", country: "GB" });
+    });
 
-  await waitFor(() => {
-    const stateItems = store.getState().weather.items;
-    expect(stateItems).toHaveLength(1);
+    await waitFor(() => {
+      const stateItems = customStore.getState().weather.items;
+      expect(stateItems).toHaveLength(1);
+      
+      const item = stateItems[0];
+      expect(item).toBeTruthy();
+      expect(item.main).toBeTruthy();
+      expect(item.main.temp).toBe(22);
+      expect(item.lastUpdated).toBeGreaterThan(1000);
+    });
+
+    expect(screen.getByText("22°C")).toBeInTheDocument();
+    expect(screen.getByText("1 mm")).toBeInTheDocument();
     
-    const item = stateItems[0];
-    expect(item).toBeTruthy();
-    expect(item.main).toBeTruthy();
-    expect(item.main.temp).toBe(22);
-    expect(item.lastUpdated).toBeGreaterThan(1000);
+    expect(mockShowToast).toHaveBeenCalledWith(
+      expect.stringMatching(/Updated weather for London/i),
+      expect.any(String)
+    );
   });
-
-  expect(screen.getByText("22°C")).toBeInTheDocument();
-  expect(screen.getByText("1 mm")).toBeInTheDocument();
-});
 });
