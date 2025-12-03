@@ -6,8 +6,6 @@ import {
   Typography,
   CircularProgress,
   Grid,
-  Snackbar,
-  Alert,
   Autocomplete,
 } from "@mui/material";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
@@ -18,15 +16,14 @@ import { addCity, updateCity} from "../slices/weatherSlice";
 import { CityWeather } from "../../../app/types";
 import { CountryOption } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
+import { useToast } from "../../../app/context/ToastContext";
 
 export const Weather: React.FC = () => {
   const [cityInput, setCityInput] = useState("");
   const [countryInput, setCountryInput] = useState<CountryOption>(COUNTRIES[0]);
-  const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastSeverity, setToastSeverity] = useState<"success" | "error" | "info" | "warning">("info");
 
   const dispatch = useDispatch<AppDispatch>();
+  const { showToast } = useToast();
   const cities = useSelector((state: RootState) => state.weather.items);
   const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
 
@@ -55,11 +52,6 @@ export const Weather: React.FC = () => {
 
   return () => clearInterval(interval);
 }, [cities, dispatch, trigger]);
-  const showToast = (msg: string, severity: typeof toastSeverity) => {
-    setToastMessage(msg);
-    setToastSeverity(severity);
-    setToastOpen(true);
-  };
 
   const handleFetch = async () => {
     if (!cityInput.trim()) {
@@ -164,22 +156,6 @@ export const Weather: React.FC = () => {
           })}
         </Grid>
       )}
-
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setToastOpen(false)}
-          severity={toastSeverity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {toastMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

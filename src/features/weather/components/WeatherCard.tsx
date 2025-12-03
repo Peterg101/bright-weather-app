@@ -8,6 +8,7 @@ import { updateCity, removeCity } from "../slices/weatherSlice";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { RootState } from "../../../app/store";
 import RefreshIcon from "@mui/icons-material/Refresh"
+import { useToast } from "../../../app/context/ToastContext";
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
   uuid,
@@ -19,17 +20,18 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   humidity,
   windSpeed,
   rainLastHour,
-  country
+  country,
 }) => {
 
   const countryInfo = COUNTRIES.find(c => c.code === country);
-  
+  const {showToast} = useToast()
 
   const dispatch = useDispatch()
   const [trigger] = useLazyGetWeatherByCityQuery()
 
   const handleDelete = () => {
     dispatch(removeCity(uuid))
+    showToast(`Removed ${city} from your cities`, "info");
   }
 
   const handleRefresh = async () => {
@@ -44,6 +46,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
     };
     
     dispatch(updateCity(updatedData));
+    showToast(`Updated weather for ${result.name}`, "info");
   } catch (error) {
     console.error("Failed to refresh city data", error);
   }

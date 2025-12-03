@@ -8,7 +8,7 @@ export interface WeatherCardProps {
     humidity: number;
     windSpeed: number;
     rainLastHour: number;
-    country: string  
+    country: string
 }
 
 export interface CountryOption {
