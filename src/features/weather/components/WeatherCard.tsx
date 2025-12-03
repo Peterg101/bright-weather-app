@@ -4,7 +4,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { WeatherCardProps } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
 import { useDispatch, useSelector } from "react-redux";
-import { addOrUpdateCity, removeCity } from "../slices/weatherSlice";
+import { updateCity, removeCity } from "../slices/weatherSlice";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { RootState } from "../../../app/store";
 import RefreshIcon from "@mui/icons-material/Refresh"
@@ -35,7 +35,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   const handleRefresh = async () => {
     try {
       const result = await trigger({ city, country }).unwrap();
-      dispatch(addOrUpdateCity({ ...result, sys: { country }, id: uuid }));
+      dispatch(updateCity({ ...result, sys: { country }, id: uuid }));
     } catch {
       console.error("Failed to refresh city data");
     }
