@@ -19,7 +19,8 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
   humidity,
   windSpeed,
   rainLastHour,
-  country
+  country,
+  showToast
 }) => {
 
   const countryInfo = COUNTRIES.find(c => c.code === country);
@@ -30,6 +31,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 
   const handleDelete = () => {
     dispatch(removeCity(uuid))
+    showToast(`Removed ${city} from your cities`, "info");
   }
 
   const handleRefresh = async () => {
@@ -44,6 +46,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
     };
     
     dispatch(updateCity(updatedData));
+    showToast(`Updated weather for ${result.name}`, "info");
   } catch (error) {
     console.error("Failed to refresh city data", error);
   }

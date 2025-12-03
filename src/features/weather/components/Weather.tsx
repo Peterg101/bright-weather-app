@@ -158,6 +158,7 @@ export const Weather: React.FC = () => {
                   windSpeed={cityData.wind.speed}
                   rainLastHour={cityData.rain?.["1h"] ?? 0}
                   country={cityData.sys?.country}
+                  showToast={showToast}
                 />
               </Grid>
             );
