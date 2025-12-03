@@ -23,7 +23,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 }) => {
 
   const countryInfo = COUNTRIES.find(c => c.code === country);
-  const flag = countryInfo?.flag ?? "";
+  
 
   const dispatch = useDispatch()
   const [trigger] = useLazyGetWeatherByCityQuery()
@@ -50,7 +50,11 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
       <CardContent>
        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h5">{city}</Typography>
-          <Typography variant="h5">{flag}</Typography>
+          {countryInfo && (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {countryInfo.flag}
+            </Box>
+          )}
           <IconButton onClick={handleRefresh} color="primary" aria-label="refresh">
             <RefreshIcon />
           </IconButton>

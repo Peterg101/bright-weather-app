@@ -91,19 +91,32 @@ export const Weather: React.FC = () => {
         <TextField label="City" value={cityInput} onChange={(e) => setCityInput(e.target.value)} />
 
         <Autocomplete
-          sx={{ width: 200 }}
-          options={COUNTRIES}
-          autoHighlight
-          getOptionLabel={(option) => `${option.flag} ${option.label}`}
-          value={countryInput}
-          onChange={(e, val) => val && setCountryInput(val)}
-          renderOption={(props, option) => (
-            <Box component="li" {...props} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>{option.flag}</span> {option.label}
-            </Box>
-          )}
-          renderInput={(params) => <TextField {...params} label="Country" />}
-        />
+        sx={{ width: 200 }}
+        options={COUNTRIES}
+        autoHighlight
+        value={countryInput}
+        onChange={(e, val) => val && setCountryInput(val)}
+        getOptionLabel={(option) => option.label}
+        renderOption={(props, option) => (
+          <Box component="li" {...props} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {option.flag} {option.label}
+          </Box>
+        )}
+        renderInput={(params) => (
+          <TextField 
+            {...params} 
+            label="Country" 
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: countryInput ? (
+                <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                  {countryInput.flag}
+                </Box>
+              ) : null
+            }}
+          />
+        )}
+/>
 
         <Button variant="contained" onClick={handleFetch}>
           Get Weather
