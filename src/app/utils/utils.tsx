@@ -1,4 +1,4 @@
-import { CountryOption } from "../types";
+import { CityWeather, CountryOption } from "../types";
 import ReactCountryFlag from "react-country-flag"
 
 
@@ -34,3 +34,4 @@ export const COUNTRIES: CountryOption[] = [
     flag: <ReactCountryFlag countryCode="IT" svg style={{ width: '1.5em', height: '1.5em' }} />
   },
 ];
+
