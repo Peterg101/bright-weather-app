@@ -3,13 +3,10 @@ import { Card, CardContent, Typography, Divider, Box, IconButton } from "@mui/ma
 import DeleteIcon from "@mui/icons-material/Delete";
 import { WeatherCardProps } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
-import { useDispatch, useSelector } from "react-redux";
-import { updateCity} from "../slices/weatherSlice";
+import { useSelector } from "react-redux";
 import { useWeatherService } from "../services/weatherService";
-import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { RootState } from "../../../app/store";
 import RefreshIcon from "@mui/icons-material/Refresh"
-import { useToast } from "../../../app/context/ToastContext";
 
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
@@ -26,10 +23,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 }) => {
 
   const countryInfo = COUNTRIES.find(c => c.code === country);
-  const {showToast} = useToast()
   const {deleteCity, refreshCity} = useWeatherService()
-  const dispatch = useDispatch()
-  const [trigger] = useLazyGetWeatherByCityQuery()
 
   const handleDelete = (uuid: string, city: string) =>deleteCity(uuid, city);
 

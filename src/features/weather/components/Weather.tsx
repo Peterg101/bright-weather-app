@@ -8,29 +8,23 @@ import {
   Grid,
   Autocomplete,
 } from "@mui/material";
-import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { WeatherCard } from "./WeatherCard";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "../../../app/store";
-import { addCity, updateCity} from "../slices/weatherSlice";
-import { CityWeather } from "../../../app/types";
+import { useSelector} from "react-redux";
+import { RootState } from "../../../app/store";
 import { CountryOption } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
-import { useToast } from "../../../app/context/ToastContext";
 import { useWeatherService } from "../services/weatherService";
 
 export const Weather: React.FC = () => {
   const [cityInput, setCityInput] = useState("");
   const [countryInput, setCountryInput] = useState<CountryOption>(COUNTRIES[0]);
-  const { fetchCity, autoRefreshCities } = useWeatherService();
-  const dispatch = useDispatch<AppDispatch>();
-  const { showToast } = useToast();
+  const { fetchCity, autoRefreshCities, isFetching } = useWeatherService();
   const cities = useSelector((state: RootState) => state.weather.items);
-  const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
 
   useEffect(() => {
   const cleanup = autoRefreshCities();
   return cleanup; 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [cities]);
 
   const handleFetch = () => {

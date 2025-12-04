@@ -1,4 +1,4 @@
-import { CityWeather, CountryOption } from "../types";
+import { CountryOption } from "../types";
 import ReactCountryFlag from "react-country-flag"
 
 

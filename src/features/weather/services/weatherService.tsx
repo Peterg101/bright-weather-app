@@ -10,7 +10,7 @@ import { findExistingCity } from "../utils/utils";
 
 export function useWeatherService() {
   const dispatch = useDispatch();
-  const [trigger] = useLazyGetWeatherByCityQuery();
+  const [trigger, {isFetching}] = useLazyGetWeatherByCityQuery();
   const { showToast } = useToast();
   const cities = useSelector((state: RootState) => state.weather.items);
   const deleteCity = (uuid: string, city: string) => {
@@ -96,6 +96,7 @@ export function useWeatherService() {
     deleteCity,
     refreshCity,
     fetchCity,
+    isFetching,
     autoRefreshCities
   };
 }
