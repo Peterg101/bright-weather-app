@@ -80,9 +80,23 @@ export function useWeatherService() {
     }
   };
 
+  const autoRefreshCities = () => {
+  if (cities.length === 0) return;
+
+  const interval = setInterval(() => {
+    cities.forEach((cityData) => {
+      refreshCity(cityData.id, cityData.name, cityData.sys.country);
+    });
+  }, 10 * 60 * 1000);
+
+  return () => clearInterval(interval);
+};
+
   return {
     deleteCity,
     refreshCity,
-    fetchCity
+    fetchCity,
+    autoRefreshCities
   };
 }
+

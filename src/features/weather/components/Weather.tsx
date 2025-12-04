@@ -17,74 +17,26 @@ import { CityWeather } from "../../../app/types";
 import { CountryOption } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
 import { useToast } from "../../../app/context/ToastContext";
+import { useWeatherService } from "../services/weatherService";
 
 export const Weather: React.FC = () => {
   const [cityInput, setCityInput] = useState("");
   const [countryInput, setCountryInput] = useState<CountryOption>(COUNTRIES[0]);
-
+  const { fetchCity, autoRefreshCities } = useWeatherService();
   const dispatch = useDispatch<AppDispatch>();
   const { showToast } = useToast();
   const cities = useSelector((state: RootState) => state.weather.items);
   const [trigger, { isFetching }] = useLazyGetWeatherByCityQuery();
 
   useEffect(() => {
-  if (cities.length === 0) return;
+  const cleanup = autoRefreshCities();
+  return cleanup; 
+}, [cities]);
 
-  const interval = setInterval(() => {
-    cities.forEach(async (cityData) => {
-      try {
-        const result = await trigger({
-          city: cityData.name,
-          country: cityData.sys.country,
-        }).unwrap();
-
-        const updated: Omit<CityWeather, "id"> = {
-          ...result,
-          sys: { country: cityData.sys.country },
-        };
-
-        dispatch(updateCity({ id: cityData.id, data: updated }));
-      } catch (err) {
-        console.error(`Failed auto-refresh for ${cityData.name}`, err);
-      }
-    });
-  }, 10 * 60 * 1000);
-
-  return () => clearInterval(interval);
-}, [cities, dispatch, trigger]);
-
-  const handleFetch = async () => {
-    if (!cityInput.trim()) {
-      showToast("Please enter a city", "warning");
-      return;
-    }
-
-    try {
-    const result = await trigger({ city: cityInput, country: countryInput.code }).unwrap();
-    
-    const cityData: Omit<CityWeather, "id"> = { 
-      ...result, 
-      sys: { country: countryInput.code } 
-    };
-    
-     const existingCity = cities.find(
-        city => city.name.toLowerCase() === result.name.toLowerCase() && 
-                city.sys.country === countryInput.code
-      );
-    
-    if (existingCity) {
-      dispatch(updateCity({ id: existingCity.id, data: cityData }));
-      showToast(`Updated weather for ${result.name}`, "info");
-    } else {
-      dispatch(addCity(cityData));
-      showToast(`Added ${result.name} to your cities`, "success");
-    }
-    
-    setCityInput("");
-  } catch {
-    showToast("City not found in selected country", "error");
-  }
-  };
+  const handleFetch = () => {
+  fetchCity(cityInput, countryInput.code);
+  setCityInput("");
+};
 
   return (
     <Box sx={{ p: 4 }}>

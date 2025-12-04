@@ -4,11 +4,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { WeatherCardProps } from "../../../app/types";
 import { COUNTRIES } from "../../../app/utils/utils";
 import { useDispatch, useSelector } from "react-redux";
-import { updateCity, removeCity } from "../slices/weatherSlice";
+import { updateCity} from "../slices/weatherSlice";
+import { useWeatherService } from "../services/weatherService";
 import { useLazyGetWeatherByCityQuery } from "../api/weatherApi";
 import { RootState } from "../../../app/store";
 import RefreshIcon from "@mui/icons-material/Refresh"
 import { useToast } from "../../../app/context/ToastContext";
+
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
   uuid,
@@ -25,31 +27,14 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 
   const countryInfo = COUNTRIES.find(c => c.code === country);
   const {showToast} = useToast()
-
+  const {deleteCity, refreshCity} = useWeatherService()
   const dispatch = useDispatch()
   const [trigger] = useLazyGetWeatherByCityQuery()
 
-  const handleDelete = () => {
-    dispatch(removeCity(uuid))
-    showToast(`Removed ${city} from your cities`, "info");
-  }
+  const handleDelete = (uuid: string, city: string) =>deleteCity(uuid, city);
 
-  const handleRefresh = async () => {
-  try {
-    const result = await trigger({ city, country }).unwrap();
-    const updatedData = {
-      id: uuid,
-      data: {
-        ...result,
-        sys: { country }
-      }
-    };
-    
-    dispatch(updateCity(updatedData));
-    showToast(`Updated weather for ${result.name}`, "info");
-  } catch (error) {
-    console.error("Failed to refresh city data", error);
-  }
+  const handleRefresh = () => {
+  refreshCity(uuid, city, country);
 };
 
   const lastUpdated = useSelector((state: RootState) => 
@@ -69,7 +54,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
           <IconButton onClick={handleRefresh} color="primary" aria-label="refresh">
             <RefreshIcon />
           </IconButton>
-          <IconButton onClick={handleDelete} color="error" sx={{ ml: "auto" }} aria-label="delete">
+          <IconButton onClick={() => handleDelete(uuid, city)}  color="error" sx={{ ml: "auto" }} aria-label="delete">
             <DeleteIcon />
           </IconButton>
         </Box>
